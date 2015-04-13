@@ -106,7 +106,7 @@
                             </tr>
                         </tbody>
                     </table>
-                    <button onclick="window.location = 'menu.action'" class="btn btn-danger spacer spacer-left" style="float:left">Skip for Now</button>
+					<button onclick="window.location = 'menu.action'" class="btn btn-danger spacer spacer-left" style="float:left">Skip for Now</button>
                     <s:form action="otpSubmit" theme="simple" >
                         <s:hidden name="sharedSecret"/>
                         <s:submit cssClass="btn btn-default spacer spacer-right" value="Got It!"/>
