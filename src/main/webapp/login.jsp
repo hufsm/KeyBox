@@ -62,6 +62,11 @@
             <tr> <td>&nbsp;</td>
                 <td align="right">  <div id="login_btn" class="btn btn-default login" >Login</div></td>
             </tr>
+            <s:if test="pwMailResetEnabled">
+	            <tr> <td>&nbsp;</td>
+	                <td align="right">  <a href="/pwReset.action">Forgot your password?</a></td>
+	            </tr>
+        	</s:if>
         </s:form>
         </p>
 
