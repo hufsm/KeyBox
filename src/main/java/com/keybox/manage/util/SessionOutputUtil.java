@@ -17,7 +17,7 @@ package com.keybox.manage.util;
 
 import com.keybox.common.util.AppConfig;
 import com.keybox.manage.db.SessionAuditDB;
-import com.keybox.manage.model.SessionHostOutput;
+import com.keybox.manage.model.Auth;
 import com.keybox.manage.model.SessionOutput;
 import com.keybox.manage.model.UserSessionsOutput;
 import org.apache.commons.lang3.StringUtils;
@@ -66,18 +66,16 @@ public class SessionOutputUtil {
     /**
      * adds a new output
      *
-     * @param sessionId     session id
-     * @param hostId        host id
      * @param sessionOutput session output object
      */
-    public static void addOutput(Long sessionId, Long hostId, SessionOutput sessionOutput) {
+    public static void addOutput(SessionOutput sessionOutput) {
 
-        UserSessionsOutput userSessionsOutput = userSessionsOutputMap.get(sessionId);
+        UserSessionsOutput userSessionsOutput = userSessionsOutputMap.get(sessionOutput.getSessionId());
         if (userSessionsOutput == null) {
-            userSessionsOutputMap.put(sessionId, new UserSessionsOutput());
-            userSessionsOutput = userSessionsOutputMap.get(sessionId);
+            userSessionsOutputMap.put(sessionOutput.getSessionId(), new UserSessionsOutput());
+            userSessionsOutput = userSessionsOutputMap.get(sessionOutput.getSessionId());
         }
-        userSessionsOutput.getSessionOutputMap().put(sessionOutput.getInstanceId(), new SessionHostOutput(hostId, new StringBuilder()));
+        userSessionsOutput.getSessionOutputMap().put(sessionOutput.getInstanceId(), sessionOutput);
     }
 
 
@@ -114,22 +112,14 @@ public class SessionOutputUtil {
 
                 //get output chars and set to output
                 try {
-                    SessionHostOutput sessionHostOutput = userSessionsOutput.getSessionOutputMap().get(key);
-                    Long hostId = sessionHostOutput.getId();
-                    StringBuilder sb = sessionHostOutput.getOutput();
-                    if (sb != null) {
-                        SessionOutput sessionOutput = new SessionOutput();
-                        sessionOutput.setSessionId(sessionId);
-                        sessionOutput.setHostSystemId(hostId);
-                        sessionOutput.setInstanceId(key);
-                        sessionOutput.setOutput(sb.toString());
-
+                    SessionOutput sessionOutput = userSessionsOutput.getSessionOutputMap().get(key);
+                    if (sessionOutput!=null && sessionOutput.getOutput() != null) {
                         if (StringUtils.isNotEmpty(sessionOutput.getOutput())) {
                             outputList.add(sessionOutput);
                             if (enableAudit) {
                                 SessionAuditDB.insertTerminalLog(con, sessionOutput);
                             }
-                            userSessionsOutput.getSessionOutputMap().put(key, new SessionHostOutput(hostId, new StringBuilder()));
+                            userSessionsOutput.getSessionOutputMap().put(key, new SessionOutput(sessionOutput.getId(), sessionOutput.getSessionId(), key));
                         }
                     }
                 } catch (Exception ex) {

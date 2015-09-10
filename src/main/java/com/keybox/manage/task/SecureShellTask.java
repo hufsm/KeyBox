@@ -43,7 +43,7 @@ public class SecureShellTask implements Runnable {
         InputStreamReader isr = new InputStreamReader(outFromChannel);
         BufferedReader br = new BufferedReader(isr);
         try {
-            SessionOutputUtil.addOutput(sessionOutput.getSessionId(), sessionOutput.getHostSystemId(), sessionOutput);
+            SessionOutputUtil.addOutput(sessionOutput);
             char[] buff = new char[SSHUtil.KEY_LENGTH];
             int read;
             while((read = br.read(buff)) != -1) {
