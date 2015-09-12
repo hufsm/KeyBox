@@ -32,12 +32,16 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * DAO class to manage users
  */
 public class UserDB {
+
+    private static Logger log = LoggerFactory.getLogger(UserDB.class);
 
     public static final String SORT_BY_FIRST_NM="first_nm";
     public static final String SORT_BY_LAST_NM="last_nm";
@@ -82,7 +86,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
 
@@ -104,7 +108,7 @@ public class UserDB {
             con = DBUtils.getConn();
             user = getUser(con, userId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return user;
@@ -142,7 +146,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return user;
     }
@@ -160,7 +164,7 @@ public class UserDB {
             con = DBUtils.getConn();
             userId = insertUser(con, user);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return userId;
@@ -199,7 +203,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return userId;
     }
@@ -223,7 +227,7 @@ public class UserDB {
             stmt.execute();
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -251,7 +255,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -271,7 +275,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -291,7 +295,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -323,7 +327,7 @@ public class UserDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch(Exception ex){
-            ex.printStackTrace();
+            log.error(ex.toString(), ex);
         }
         DBUtils.closeConn(con);
         return isUnique;

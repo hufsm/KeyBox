@@ -24,11 +24,15 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DAO to manage user profile information
  */
 public class UserProfileDB {
+
+    private static Logger log = LoggerFactory.getLogger(UserProfileDB.class);
 
     /**
      * add profile for given user
@@ -55,7 +59,7 @@ public class UserProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeStmt(stmt);
         DBUtils.closeConn(con);
@@ -79,7 +83,7 @@ public class UserProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -99,7 +103,7 @@ public class UserProfileDB {
             profileList = getProfilesByUser(con, userId);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return profileList;
@@ -129,7 +133,7 @@ public class UserProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return profileList;
     }
@@ -148,7 +152,7 @@ public class UserProfileDB {
             userList = getUsersByProfile(con, profileId);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return userList;
@@ -181,7 +185,7 @@ public class UserProfileDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return userList;
     }
@@ -211,7 +215,7 @@ public class UserProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return isUsersProfile;

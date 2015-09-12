@@ -15,7 +15,14 @@
  */
 package com.keybox.manage.util;
 
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.ChannelShell;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import com.keybox.common.util.AppConfig;
 import com.keybox.manage.db.*;
 import com.keybox.manage.model.*;
@@ -31,13 +38,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SSH utility class used to create public/private key for system and distribute authorized key files
  */
 public class SSHUtil {
 
-	public static final boolean keyManagementEnabled = "true".equals(AppConfig.getProperty("keyManagementEnabled"));
+
+    private static Logger log = LoggerFactory.getLogger(SSHUtil.class);
+    public static final boolean keyManagementEnabled = "true".equals(AppConfig.getProperty("keyManagementEnabled"));
 
 	//system path to public/private key
 	public static final String KEY_PATH = DBUtils.class.getClassLoader().getResource("keydb").getPath();
@@ -77,7 +88,7 @@ public class SSHUtil {
 		try {
 			publicKey = FileUtils.readFileToString(file);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			log.error(ex.toString(), ex);
 		}
 		return publicKey;
 	}
@@ -101,7 +112,7 @@ public class SSHUtil {
 		try {
 			privateKey = FileUtils.readFileToString(file);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			log.error(ex.toString(), ex);
 		}
 		return privateKey;
 	}
@@ -167,10 +178,10 @@ public class SSHUtil {
 				KeyPair keyPair = KeyPair.genKeyPair(jsch, type, KEY_LENGTH);
 				keyPair.writePrivateKey(PVT_KEY, passphrase.getBytes());
 				keyPair.writePublicKey(PUB_KEY, comment);
-				System.out.println("Finger print: " + keyPair.getFingerPrint());
+                System.out.println("Finger print: " + keyPair.getFingerPrint());
 				keyPair.dispose();
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error(e.toString(), e);
 			}
 		}
 		return passphrase;
@@ -536,13 +547,7 @@ public class SSHUtil {
 			InputStream outFromChannel = channel.getInputStream();
 
 			//new session output
-			SessionOutput sessionOutput = new SessionOutput();
-			sessionOutput.setId(hostSystem.getId());
-            sessionOutput.setInstanceId(instanceId);
-			sessionOutput.setSessionId(sessionId);
-            sessionOutput.setDisplayNm(hostSystem.getDisplayNm());
-            sessionOutput.setUser(hostSystem.getUser());
-            sessionOutput.setPort(hostSystem.getPort());
+			SessionOutput sessionOutput = new SessionOutput(sessionId, hostSystem);
 
 			Runnable run = new SecureShellTask(sessionOutput, outFromChannel);
 			Thread thread = new Thread(run);
@@ -675,7 +680,7 @@ public class SSHUtil {
 					fingerprint=keyPair.getFingerPrint();
 				}
 			} catch (JSchException ex){
-				ex.printStackTrace();
+				log.error(ex.toString(), ex);
 			}
 		}
 		return fingerprint;
@@ -705,7 +710,7 @@ public class SSHUtil {
 					}
 				}
 			} catch (JSchException ex){
-				ex.printStackTrace();
+				log.error(ex.toString(), ex);
 			}
 		}
 		return keyType;

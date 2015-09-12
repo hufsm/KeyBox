@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,6 +51,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ProfileSystemsDB {
 
+    private static Logger log = LoggerFactory.getLogger(ProfileSystemsDB.class);
 	/**
 	 * adds a host system to profile
 	 *
@@ -67,7 +70,7 @@ public class ProfileSystemsDB {
 			DBUtils.closeStmt(stmt);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 	}
@@ -87,7 +90,7 @@ public class ProfileSystemsDB {
 			stmt.execute();
 			DBUtils.closeStmt(stmt);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 	}
@@ -122,7 +125,7 @@ public class ProfileSystemsDB {
 			DBUtils.closeRs(rs);
 			DBUtils.closeStmt(stmt);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		return hostSystemList;
 	}
@@ -142,7 +145,7 @@ public class ProfileSystemsDB {
 			hostSystemList=getSystemsByProfile(con,profileId);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 		return hostSystemList;
@@ -168,7 +171,7 @@ public class ProfileSystemsDB {
 			DBUtils.closeRs(rs);
 			DBUtils.closeStmt(stmt);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		return systemIdList;
 	}
@@ -188,7 +191,7 @@ public class ProfileSystemsDB {
 			systemIdList = getSystemIdsByProfile(con, profileId);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 		return systemIdList;
@@ -218,7 +221,7 @@ public class ProfileSystemsDB {
 			DBUtils.closeStmt(stmt);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		return systemIdList;
 	}
@@ -239,7 +242,7 @@ public class ProfileSystemsDB {
 			systemIdList = getSystemIdsByProfile(con, profileId, userId);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 		return systemIdList;
