@@ -64,6 +64,7 @@ public class SSHUtil {
 
 	public static final boolean dynamicKeys = AppConfig.getProperty("dynamicKeys").equals("true");
 	
+	public static final int SERVER_ALIVE_INTERVAL = StringUtils.isNumeric(AppConfig.getProperty("serverAliveInterval")) ? Integer.parseInt(AppConfig.getProperty("serverAliveInterval")) * 1000 : 60 * 1000;
 	public static final int SESSION_TIMEOUT = 60000;
 	public static final int CHANNEL_TIMEOUT = 60000;
 	
@@ -221,9 +222,8 @@ public class SSHUtil {
 			if (password != null && !password.equals("")) {
 				session.setPassword(password);
 			}
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			session.setConfig(config);
+			session.setConfig("StrictHostKeyChecking", "no");
+			session.setServerAliveInterval(SERVER_ALIVE_INTERVAL);
 			session.connect(SESSION_TIMEOUT);
 			ApplicationKey genAppKey = null;
 			//Generate new Key?
@@ -537,6 +537,7 @@ public class SSHUtil {
 				session.setPassword(password);
 			}
 			session.setConfig("StrictHostKeyChecking", "no");
+			session.setServerAliveInterval(SERVER_ALIVE_INTERVAL);
 			session.connect(SESSION_TIMEOUT);
 			Channel channel = session.openChannel("shell");
 			if ("true".equals(AppConfig.getProperty("agentForwarding"))) {
