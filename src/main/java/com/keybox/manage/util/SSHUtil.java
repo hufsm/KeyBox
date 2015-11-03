@@ -233,6 +233,7 @@ public class SSHUtil {
 			}
 			addPubKey(hostSystem, session, genAppKey);
 		} catch (Exception e) {
+			log.info(e.toString(), e);
 			hostSystem.setErrorMsg(e.getMessage());
 			if (e.getMessage().toLowerCase().contains("userauth fail")) {
 				hostSystem.setStatusCd(HostSystem.PUBLIC_KEY_FAIL_STATUS);
@@ -282,6 +283,7 @@ public class SSHUtil {
 			file.close();
 
 		} catch (Exception e) {
+			log.info(e.toString(), e);
 			hostSystem.setErrorMsg(e.getMessage());
 			hostSystem.setStatusCd(HostSystem.GENERIC_FAIL_STATUS);
 		}
@@ -381,6 +383,7 @@ public class SSHUtil {
 			}
 			
 		} catch (Exception e) {
+			log.info(e.toString(), e);
 			hostSystem.setErrorMsg(e.getMessage());
 			hostSystem.setStatusCd(HostSystem.GENERIC_FAIL_STATUS);
 		}
@@ -579,6 +582,7 @@ public class SSHUtil {
 			addPubKey(hostSystem, session, genAppKey);
 
 		} catch (Exception e) {
+			log.info(e.toString(), e);
 			hostSystem.setErrorMsg(e.getMessage());
 			if (e.getMessage().toLowerCase().contains("userauth fail")) {
 				hostSystem.setStatusCd(HostSystem.PUBLIC_KEY_FAIL_STATUS);
