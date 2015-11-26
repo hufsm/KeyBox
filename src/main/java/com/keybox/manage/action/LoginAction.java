@@ -42,7 +42,7 @@ public class LoginAction extends ActionSupport implements ServletRequestAware, S
     Auth auth;
     private final String AUTH_ERROR="Authentication Failed : Login credentials are invalid";
     //check if otp is enabled
-    boolean otpEnabled="true".equals(AppConfig.getProperty("enableOTP"));
+    boolean otpEnabled = ("required".equals(AppConfig.getProperty("oneTimePassword")) || "optional".equals(AppConfig.getProperty("oneTimePassword")));
     boolean pwMailResetEnabled="true".equals(AppConfig.getProperty("pwMailReset"));
 
     @Action(value = "/login",
