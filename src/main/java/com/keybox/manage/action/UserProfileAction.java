@@ -17,7 +17,6 @@ package com.keybox.manage.action;
 
 
 import com.keybox.manage.db.ProfileDB;
-import com.keybox.manage.db.PublicKeyDB;
 import com.keybox.manage.db.UserDB;
 import com.keybox.manage.db.UserProfileDB;
 import com.keybox.manage.model.Profile;
@@ -76,7 +75,6 @@ public class UserProfileAction extends ActionSupport {
     public String deleteProfileFromUser() {
 
         UserProfileDB.deleteProfileFromUser(profileId, user.getId());
-        PublicKeyDB.deleteProfilePublicKeys(profileId);
         RefreshAuthKeyUtil.refreshProfileSystems(profileId);
         return SUCCESS;
     }
