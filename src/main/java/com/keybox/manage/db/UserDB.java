@@ -272,6 +272,10 @@ public class UserDB {
             stmt.setLong(6, user.getId());
             stmt.execute();
             DBUtils.closeStmt(stmt);
+            if (User.ADMINISTRATOR.equals(user.getUserType())) {
+                PublicKeyDB.deleteUnassignedKeysByUser(con, user.getId());
+            }
+
         } catch (Exception e) {
             log.error(e.toString(), e);
         }
@@ -299,6 +303,9 @@ public class UserDB {
             stmt.setLong(8, user.getId());
             stmt.execute();
             DBUtils.closeStmt(stmt);
+            if(User.ADMINISTRATOR.equals(user.getUserType())) {
+                PublicKeyDB.deleteUnassignedKeysByUser(con, user.getId());
+            }
 
         } catch (Exception e) {
             log.error(e.toString(), e);
