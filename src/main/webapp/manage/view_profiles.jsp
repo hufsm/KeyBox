@@ -86,7 +86,7 @@
 
         <h3>Manage System/Instance Profiles</h3>
 
-        <p>Add / Delete profiles or select a profile below to assign systems to that profile. For EC2 Connection use tags to control user access</p>
+        <p>Add / Delete profiles or assign users and systems to that profile. For EC2 Connection use tags to control user access</p>
 
 
         <s:if test="sortedSet.itemList!= null && !sortedSet.itemList.isEmpty()">
