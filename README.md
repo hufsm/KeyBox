@@ -1,6 +1,4 @@
-KeyBox			
-[![Build Status](https://jenkins01.hufsm.com/job/backend-deploy/job/keybox/badge/icon)](https://jenkins01.hufsm.com/job/backend-deploy/job/keybox/)
-[![Build Status](https://jenkins01.hufsm.com/buildStatus/icon?job=backend-deploy/keybox)](https://jenkins01.hufsm.com/job/backend-deploy/job/keybox/)
+KeyBox	[![Build Status](https://jenkins01.hufsm.com/buildStatus/icon?job=backend-deploy/keybox)](https://jenkins01.hufsm.com/job/backend-deploy/job/keybox/)
 ======
 KeyBox is a web-based SSH console that centrally manages administrative access to systems. Web-based administration is combined with management and distribution of user's public SSH keys. Key management and administration is based on profiles assigned to defined users.
 
