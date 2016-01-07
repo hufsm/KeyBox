@@ -194,7 +194,7 @@
             });
 
             $(document).click(function (e) {
-                if (termFocus) {
+                if (termFocus && !$('body').hasClass('modal-open')) {
                     $('#dummy').focus();
                 }
                 //always change focus unless in match sort
@@ -233,7 +233,7 @@
                 var id = element.attr("id").replace("run_cmd_", "");
 
                 if (termMap[id]) {
-                    var width = $('#run_cmd_'+id).find(".output:first").innerWidth();
+                    var width = $('#run_cmd_'+id).find(".output:first").innerWidth() - 8;
                     var height = $('#run_cmd_'+id).innerHeight() - y_offset;
 
                     termMap[id].resize(Math.floor(width / 7.2981), Math.floor(height / 14.4166));
@@ -612,7 +612,7 @@
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
-                    <button type="button" class="close cancel_btn" data-dismiss="modal" aria-hidden="true">x</button>
+                    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">x</button>
                     <h4 class="modal-title">Connect to Host</h4>
                 </div>
                 <div class="modal-body">

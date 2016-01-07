@@ -33,11 +33,15 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DAO to manage public keys
  */
 public class PublicKeyDB {
+
+    private static Logger log = LoggerFactory.getLogger(PublicKeyDB.class);
 
     public static final String FILTER_BY_USER_ID = "user_id";
     public static final String FILTER_BY_PROFILE_ID = "profile_id";
@@ -51,7 +55,46 @@ public class PublicKeyDB {
     public static final String SORT_BY_USERNAME= "username";
     public static final String SORT_BY_ENABLED="enabled";
 
+    /**
+     * Deletes all SSH keys for users that are not assigned in a profile
+     *
+     * @param con DB connection
+     * @param userId user id
+     */
+    public static void deleteUnassignedKeysByUser(Connection con, Long userId){
 
+        try {
+            PreparedStatement stmt = con.prepareStatement("delete from public_keys where (profile_id is null or profile_id not in (select profile_id from user_map where user_id=?)) and user_id=?");
+            stmt.setLong(1, userId);
+            stmt.setLong(2, userId);
+            stmt.execute();
+            DBUtils.closeStmt(stmt);
+
+        } catch (Exception e) {
+            log.error(e.toString(), e);
+        }
+    }
+
+    /**
+     * Deletes all SSH keys for users that are not assigned in a profile
+     *
+     * @param con DB connection
+     * @param profileId profile id
+     */
+    public static void deleteUnassignedKeysByProfile(Connection con, Long profileId){
+
+        try {
+            PreparedStatement stmt = con.prepareStatement("delete from public_keys where profile_id=? and user_id not in (select user_id from user_map where profile_id=?)");
+            stmt.setLong(1, profileId);
+            stmt.setLong(2, profileId);
+            stmt.execute();
+            DBUtils.closeStmt(stmt);
+
+        } catch (Exception e) {
+            log.error(e.toString(), e);
+        }
+    }
+    
     /**
      * disables SSH key
      *
@@ -67,7 +110,7 @@ public class PublicKeyDB {
             stmt.execute();
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -88,7 +131,7 @@ public class PublicKeyDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -114,7 +157,7 @@ public class PublicKeyDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return isDisabled;
@@ -177,7 +220,7 @@ public class PublicKeyDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         sortedSet.setItemList(publicKeysList);
@@ -222,7 +265,7 @@ public class PublicKeyDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         sortedSet.setItemList(publicKeysList);
@@ -244,7 +287,7 @@ public class PublicKeyDB {
             con = DBUtils.getConn();
             publicKey = getPublicKey(con, publicKeyId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return publicKey;
@@ -278,7 +321,7 @@ public class PublicKeyDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return publicKey;
     }
@@ -333,6 +376,8 @@ public class PublicKeyDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
+            log.error(e.toString(), e);
+
         	if(spt != null)
         	{
         		try {
@@ -386,7 +431,7 @@ public class PublicKeyDB {
             }
             DBUtils.closeStmt(stmt_pk_pkf_test);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -411,7 +456,7 @@ public class PublicKeyDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -432,7 +477,7 @@ public class PublicKeyDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -447,13 +492,13 @@ public class PublicKeyDB {
         Connection con = null;
         try {
             con = DBUtils.getConn();
-            PreparedStatement stmt = con.prepareStatement("delete from public_keys where profile_id=? and enabled=true");
+            PreparedStatement stmt = con.prepareStatement("delete from public_keys where profile_id=?");
             stmt.setLong(1, profileId);
             stmt.execute();
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -467,7 +512,7 @@ public class PublicKeyDB {
             con = DBUtils.getConn();
             publicKeyList = getPublicKeysForSystem(con, systemId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return publicKeyList;
@@ -489,7 +534,7 @@ public class PublicKeyDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return publicKeyList;
     }
@@ -531,7 +576,7 @@ public class PublicKeyDB {
           DBUtils.closeStmt(stmt);
 
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error(ex.toString(), ex);
         }
         DBUtils.closeConn(con);
         return isDuplicate;
@@ -567,7 +612,7 @@ public class PublicKeyDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         

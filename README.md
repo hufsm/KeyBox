@@ -1,4 +1,4 @@
-KeyBox
+KeyBox	[![Build Status](https://jenkins01.hufsm.com/buildStatus/icon?job=backend-deploy/keybox)](https://jenkins01.hufsm.com/job/backend-deploy/job/keybox/)
 ======
 KeyBox is a web-based SSH console that centrally manages administrative access to systems. Web-based administration is combined with management and distribution of user's public SSH keys. Key management and administration is based on profiles assigned to defined users.
 
@@ -10,8 +10,8 @@ KeyBox layers TLS/SSL on top of SSH and acts as a bastion host for administratio
 
 Prerequisites
 -------------
-* Java JDK 1.7 or greater
-http://www.oracle.com/technetwork/java/javase/overview/index.html
+* Java JDK 1.8 or greater
+http://www.oracle.com/technetwork/java/javase/downloads/index.html
 
 * Browser with Web Socket support
 http://caniuse.com/websockets *Note: In Safari if using a self-signed certificate you must import the certificate into your Keychain.
@@ -81,7 +81,7 @@ Managing SSH Keys
 ------
 By default KeyBox will overwrite all values in the specified authorized_keys file for a system.  You can disable key management by editing KeyBoxConfig.properties file and use KeyBox only as a bastion host.  This file is located in the jetty/keybox/WEB-INF/classes directory. (or the src/main/resources directory if building from source)
 
-	#enable key management  --set to false to disable
+	#set to false to disable key management. If false, the KeyBox public key will be appended to the authorized_keys file (instead of it being overwritten completely).
 	keyManagementEnabled=false
 
 Also, the authorized_keys file is updated/refreshed periodically based on the relationships defined in the application.  If key management is enabled the refresh interval can be specified in the KeyBoxConfig.properties file.
@@ -148,7 +148,7 @@ Auditing
 Auditing is disabled by default and is only a proof of concept.  Can be enabled in the KeyBoxConfig.properties.
 
 	#enable audit  --set to true to enable
-	enableAudit=true
+	enableInternalAudit=true
 
 Using KeyBox
 ------
@@ -168,7 +168,7 @@ Steps:
 5. Users can login to create sessions on assigned systems
 6. Start a composite SSH session or create and execute a script across multiple sessions
 7. Add additional public keys to systems
-8. Disable any adminstrative public key forcing key rotation.
+8. Disable any administrative public key forcing key rotation.
 9. Audit session history
 
 Screenshots
@@ -205,4 +205,10 @@ Author
 
 (Follow me on twitter for release updates, but mostly nonsense)
 
+Donations for Sean Kavanagh
+------
+Dontations are always welcome!
+
+<span class="badge-paypal"><a href="https://www.paypal.me/SKavanagh" title="Donate to this project using Paypal"><img src="https://img.shields.io/badge/paypal-donate-yellow.svg" alt="PayPal donate button" /></a></span>
+<span class="badge-bitcoin"><a href="https://www.coinbase.com/checkouts/e188c5eab8f5f0ed955cf4ecb0c4b569" title="Donate once-off to this project using Bitcoin"><img src="https://img.shields.io/badge/bitcoin-donate-yellow.svg" alt="Bitcoin donate button" /></a></span>
 

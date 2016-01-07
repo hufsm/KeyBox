@@ -24,12 +24,16 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * DAO to manage profile
  */
 public class ProfileDB {
+
+    private static Logger log = LoggerFactory.getLogger(ProfileDB.class);
 
     public static final String SORT_BY_PROFILE_NM="nm";
 
@@ -65,7 +69,7 @@ public class ProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         sortedSet.setItemList(profileList);
@@ -99,7 +103,7 @@ public class ProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return profileList;
@@ -119,7 +123,7 @@ public class ProfileDB {
             con = DBUtils.getConn();
             profile=getProfile(con, profileId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return profile;
@@ -152,7 +156,7 @@ public class ProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return profile;
     }
@@ -175,7 +179,7 @@ public class ProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -199,7 +203,7 @@ public class ProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -220,7 +224,7 @@ public class ProfileDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
 

@@ -15,7 +15,14 @@
  */
 package com.keybox.manage.util;
 
-import com.jcraft.jsch.*;
+import com.jcraft.jsch.Channel;
+import com.jcraft.jsch.ChannelSftp;
+import com.jcraft.jsch.ChannelShell;
+import com.jcraft.jsch.JSch;
+import com.jcraft.jsch.JSchException;
+import com.jcraft.jsch.KeyPair;
+import com.jcraft.jsch.Session;
+import com.jcraft.jsch.SftpException;
 import com.keybox.common.util.AppConfig;
 import com.keybox.manage.db.*;
 import com.keybox.manage.model.*;
@@ -31,13 +38,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * SSH utility class used to create public/private key for system and distribute authorized key files
  */
 public class SSHUtil {
 
-	public static final boolean keyManagementEnabled = "true".equals(AppConfig.getProperty("keyManagementEnabled"));
+
+    private static Logger log = LoggerFactory.getLogger(SSHUtil.class);
+    public static final boolean keyManagementEnabled = "true".equals(AppConfig.getProperty("keyManagementEnabled"));
 
 	//system path to public/private key
 	public static final String KEY_PATH = DBUtils.class.getClassLoader().getResource("keydb").getPath();
@@ -53,6 +64,7 @@ public class SSHUtil {
 
 	public static final boolean dynamicKeys = AppConfig.getProperty("dynamicKeys").equals("true");
 	
+	public static final int SERVER_ALIVE_INTERVAL = StringUtils.isNumeric(AppConfig.getProperty("serverAliveInterval")) ? Integer.parseInt(AppConfig.getProperty("serverAliveInterval")) * 1000 : 60 * 1000;
 	public static final int SESSION_TIMEOUT = 60000;
 	public static final int CHANNEL_TIMEOUT = 60000;
 	
@@ -77,7 +89,7 @@ public class SSHUtil {
 		try {
 			publicKey = FileUtils.readFileToString(file);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			log.error(ex.toString(), ex);
 		}
 		return publicKey;
 	}
@@ -101,7 +113,7 @@ public class SSHUtil {
 		try {
 			privateKey = FileUtils.readFileToString(file);
 		} catch (Exception ex) {
-			ex.printStackTrace();
+			log.error(ex.toString(), ex);
 		}
 		return privateKey;
 	}
@@ -159,7 +171,12 @@ public class SSHUtil {
 		if (StringUtils.isEmpty(AppConfig.getProperty("privateKey")) || StringUtils.isEmpty(AppConfig.getProperty("publicKey"))) {
 
 			//set key type
-			int type = KEY_TYPE.equals("rsa") ? KeyPair.RSA : KeyPair.DSA;
+			int type = KeyPair.RSA;
+			if(SSHUtil.KEY_TYPE.equals("dsa")) {
+				type = KeyPair.DSA;
+			} else if(SSHUtil.KEY_TYPE.equals("ecdsa")) {
+				type = KeyPair.ECDSA;
+			}
 			String comment = "keybox@global_key";
 
 			JSch jsch = new JSch();
@@ -167,10 +184,10 @@ public class SSHUtil {
 				KeyPair keyPair = KeyPair.genKeyPair(jsch, type, KEY_LENGTH);
 				keyPair.writePrivateKey(PVT_KEY, passphrase.getBytes());
 				keyPair.writePublicKey(PUB_KEY, comment);
-				System.out.println("Finger print: " + keyPair.getFingerPrint());
+                System.out.println("Finger print: " + keyPair.getFingerPrint());
 				keyPair.dispose();
 			} catch (Exception e) {
-				e.printStackTrace();
+				log.error(e.toString(), e);
 			}
 		}
 		return passphrase;
@@ -210,9 +227,8 @@ public class SSHUtil {
 			if (password != null && !password.equals("")) {
 				session.setPassword(password);
 			}
-			java.util.Properties config = new java.util.Properties();
-			config.put("StrictHostKeyChecking", "no");
-			session.setConfig(config);
+			session.setConfig("StrictHostKeyChecking", "no");
+			session.setServerAliveInterval(SERVER_ALIVE_INTERVAL);
 			session.connect(SESSION_TIMEOUT);
 			ApplicationKey genAppKey = null;
 			//Generate new Key?
@@ -222,6 +238,7 @@ public class SSHUtil {
 			}
 			addPubKey(hostSystem, session, genAppKey);
 		} catch (Exception e) {
+			log.info(e.toString(), e);
 			hostSystem.setErrorMsg(e.getMessage());
 			if (e.getMessage().toLowerCase().contains("userauth fail")) {
 				hostSystem.setStatusCd(HostSystem.PUBLIC_KEY_FAIL_STATUS);
@@ -271,6 +288,7 @@ public class SSHUtil {
 			file.close();
 
 		} catch (Exception e) {
+			log.info(e.toString(), e);
 			hostSystem.setErrorMsg(e.getMessage());
 			hostSystem.setStatusCd(HostSystem.GENERIC_FAIL_STATUS);
 		}
@@ -370,6 +388,7 @@ public class SSHUtil {
 			}
 			
 		} catch (Exception e) {
+			log.info(e.toString(), e);
 			hostSystem.setErrorMsg(e.getMessage());
 			hostSystem.setStatusCd(HostSystem.GENERIC_FAIL_STATUS);
 		}
@@ -526,6 +545,7 @@ public class SSHUtil {
 				session.setPassword(password);
 			}
 			session.setConfig("StrictHostKeyChecking", "no");
+			session.setServerAliveInterval(SERVER_ALIVE_INTERVAL);
 			session.connect(SESSION_TIMEOUT);
 			Channel channel = session.openChannel("shell");
 			if ("true".equals(AppConfig.getProperty("agentForwarding"))) {
@@ -536,10 +556,7 @@ public class SSHUtil {
 			InputStream outFromChannel = channel.getInputStream();
 
 			//new session output
-			SessionOutput sessionOutput = new SessionOutput();
-			sessionOutput.setHostSystemId(hostSystem.getId());
-			sessionOutput.setInstanceId(instanceId);
-			sessionOutput.setSessionId(sessionId);
+			SessionOutput sessionOutput = new SessionOutput(sessionId, hostSystem);
 
 			Runnable run = new SecureShellTask(sessionOutput, outFromChannel);
 			Thread thread = new Thread(run);
@@ -570,6 +587,7 @@ public class SSHUtil {
 			addPubKey(hostSystem, session, genAppKey);
 
 		} catch (Exception e) {
+			log.info(e.toString(), e);
 			hostSystem.setErrorMsg(e.getMessage());
 			if (e.getMessage().toLowerCase().contains("userauth fail")) {
 				hostSystem.setStatusCd(HostSystem.PUBLIC_KEY_FAIL_STATUS);
@@ -672,7 +690,7 @@ public class SSHUtil {
 					fingerprint=keyPair.getFingerPrint();
 				}
 			} catch (JSchException ex){
-				ex.printStackTrace();
+				log.error(ex.toString(), ex);
 			}
 		}
 		return fingerprint;
@@ -695,6 +713,8 @@ public class SSHUtil {
 						keyType="DSA";
 					} else if (KeyPair.RSA == type){
 						keyType="RSA";
+					} else if (KeyPair.ECDSA == type){
+						keyType="ECDSA";
 					} else if(KeyPair.UNKNOWN ==type){
 						keyType="UNKNOWN";
 					} else if(KeyPair.ERROR == type){
@@ -702,7 +722,7 @@ public class SSHUtil {
 					}
 				}
 			} catch (JSchException ex){
-				ex.printStackTrace();
+				log.error(ex.toString(), ex);
 			}
 		}
 		return keyType;

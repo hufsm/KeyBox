@@ -20,6 +20,7 @@ import com.keybox.manage.db.PrivateKeyDB;
 import com.keybox.manage.model.ApplicationKey;
 import com.keybox.manage.model.Auth;
 import com.keybox.manage.model.Fingerprint;
+import com.keybox.manage.model.SessionOutput;
 import com.keybox.manage.util.DBUtils;
 import com.keybox.manage.util.EncryptionUtil;
 import com.keybox.manage.util.RefreshApplicationKeyUtil;
@@ -34,6 +35,8 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Initial startup task.  Creates an SQLite DB and generates
@@ -43,6 +46,8 @@ import java.sql.Statement;
 		urlPatterns = {"/config"},
 		loadOnStartup = 1)
 public class DBInitServlet extends javax.servlet.http.HttpServlet {
+
+    private static Logger log = LoggerFactory.getLogger(DBInitServlet.class);
 
 	/**
 	 * task init method that created DB and generated public/private keys
@@ -256,7 +261,7 @@ public class DBInitServlet extends javax.servlet.http.HttpServlet {
 
 
 		} catch (Exception ex) {
-			ex.printStackTrace();
+            log.error(ex.toString(), ex);
 		}
 
 		DBUtils.closeStmt(statement);

@@ -28,12 +28,15 @@ import java.sql.SQLException;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DAO that returns public / private key for the system generated private key
  */
 public class PrivateKeyDB {
 
+    private static Logger log = LoggerFactory.getLogger(PrivateKeyDB.class);
 
     public static final String FILTER_BY_ENABLED = "enabled";
 
@@ -536,7 +539,7 @@ public class PrivateKeyDB {
             }
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return ec2RegionList;

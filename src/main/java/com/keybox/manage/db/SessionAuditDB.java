@@ -32,12 +32,15 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DB class to store terminal logs for sessions
  */
 public class SessionAuditDB {
 
+    private static Logger log = LoggerFactory.getLogger(SessionAuditDB.class);
 
     public static final String FILTER_BY_USER_ID = "user_id";
     public static final String FILTER_BY_SYSTEM_ID = "system_id";
@@ -74,7 +77,7 @@ public class SessionAuditDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
 
     }
@@ -124,7 +127,7 @@ public class SessionAuditDB {
             }
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         //close db connection
         DBUtils.closeConn(con);
@@ -147,7 +150,7 @@ public class SessionAuditDB {
             sessionId = createSessionLog(con, userId);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         //close db connection
         DBUtils.closeConn(con);
@@ -174,7 +177,7 @@ public class SessionAuditDB {
             }
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return sessionId;
     }
@@ -192,7 +195,7 @@ public class SessionAuditDB {
         try {
             insertTerminalLog(con, sessionOutput);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         //close db connection
         DBUtils.closeConn(con);
@@ -208,18 +211,18 @@ public class SessionAuditDB {
     public static void insertTerminalLog(Connection con, SessionOutput sessionOutput) {
 
         try {
-            if (sessionOutput != null && sessionOutput.getSessionId() != null && sessionOutput.getInstanceId() != null && sessionOutput.getOutput() != null && !sessionOutput.getOutput().equals("")) {
+            if (sessionOutput != null && sessionOutput.getSessionId() != null && sessionOutput.getInstanceId() != null && sessionOutput.getOutput() != null && !sessionOutput.getOutput().toString().equals("")) {
                 //insert
                 PreparedStatement stmt = con.prepareStatement("insert into terminal_log (session_id, instance_id, system_id, output) values(?,?,?,?)");
                 stmt.setLong(1, sessionOutput.getSessionId());
                 stmt.setLong(2, sessionOutput.getInstanceId());
-                stmt.setLong(3, sessionOutput.getHostSystemId());
-                stmt.setString(4, sessionOutput.getOutput());
+                stmt.setLong(3, sessionOutput.getId());
+                stmt.setString(4, sessionOutput.getOutput().toString());
                 stmt.execute();
                 DBUtils.closeStmt(stmt);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
     }
 
@@ -238,7 +241,7 @@ public class SessionAuditDB {
         try {
             outputList = getTerminalLogsForSession(con, sessionId, instanceId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         //close db connection
         DBUtils.closeConn(con);
@@ -275,14 +278,14 @@ public class SessionAuditDB {
             SessionOutput sessionOutput = new SessionOutput();
             sessionOutput.setSessionId(sessionId);
             sessionOutput.setInstanceId(instanceId);
-            sessionOutput.setOutput(output);
-            
+            sessionOutput.getOutput().append(output);
+
             outputList.add(sessionOutput);
 
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return outputList;
     }
@@ -309,7 +312,7 @@ public class SessionAuditDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error(ex.toString(), ex);
         }
         return hostSystemList;
     }
@@ -340,7 +343,7 @@ public class SessionAuditDB {
             }
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         //close db connection
         DBUtils.closeConn(con);
