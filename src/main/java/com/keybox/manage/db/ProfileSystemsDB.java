@@ -40,6 +40,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
@@ -49,7 +51,9 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class ProfileSystemsDB {
 
-	/**
+    private static Logger log = LoggerFactory.getLogger(ProfileSystemsDB.class);
+
+    /**
 	 * adds a host system to profile
 	 *
 	 * @param profileId profile id
@@ -73,6 +77,39 @@ public class ProfileSystemsDB {
 	}
 
 	/**
+	 * sets host systems for profile
+	 *
+	 * @param profileId profile id
+	 * @param systemIdList list of host system ids
+	 */
+	public static void setSystemsForProfile(Long profileId, List<Long> systemIdList) {
+
+		Connection con = null;
+		try {
+
+			con = DBUtils.getConn();
+			PreparedStatement stmt = con.prepareStatement("delete from system_map where profile_id=?");
+			stmt.setLong(1, profileId);
+			stmt.execute();
+			DBUtils.closeStmt(stmt);
+
+
+			for(Long systemId : systemIdList) {
+				stmt = con.prepareStatement("insert into system_map (profile_id, system_id) values (?,?)");
+				stmt.setLong(1, profileId);
+				stmt.setLong(2, systemId);
+				stmt.execute();
+				DBUtils.closeStmt(stmt);
+			}
+
+    } catch (Exception e) {
+    log.error(e.toString(), e);
+  }
+  DBUtils.closeConn(con);
+
+	}
+
+	/**
 	 * deletes all systems for a given profile
 	 *
 	 * @param profileId profile id
@@ -87,11 +124,10 @@ public class ProfileSystemsDB {
 			stmt.execute();
 			DBUtils.closeStmt(stmt);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 	}
-
 
 	/**
 	 * returns a list of systems for a given profile
@@ -122,7 +158,7 @@ public class ProfileSystemsDB {
 			DBUtils.closeRs(rs);
 			DBUtils.closeStmt(stmt);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		return hostSystemList;
 	}
@@ -142,7 +178,7 @@ public class ProfileSystemsDB {
 			hostSystemList=getSystemsByProfile(con,profileId);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 		return hostSystemList;
@@ -168,7 +204,7 @@ public class ProfileSystemsDB {
 			DBUtils.closeRs(rs);
 			DBUtils.closeStmt(stmt);
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		return systemIdList;
 	}
@@ -188,7 +224,7 @@ public class ProfileSystemsDB {
 			systemIdList = getSystemIdsByProfile(con, profileId);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 		return systemIdList;
@@ -218,7 +254,7 @@ public class ProfileSystemsDB {
 			DBUtils.closeStmt(stmt);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		return systemIdList;
 	}
@@ -239,12 +275,12 @@ public class ProfileSystemsDB {
 			systemIdList = getSystemIdsByProfile(con, profileId, userId);
 
 		} catch (Exception e) {
-			e.printStackTrace();
+			log.error(e.toString(), e);
 		}
 		DBUtils.closeConn(con);
 		return systemIdList;
 	}
-	
+
 	/**
 	 * Update Profile and AWS Systems in DB
 	 * <br><br>
@@ -253,27 +289,27 @@ public class ProfileSystemsDB {
 	 * Rebuild SystemProfileEntries for EC2 systems
 	 */
 	public static void updateProfileAWSSysteme() {
-		
+
 		SystemDB.updateAWSSystems();
 		deleteAWSSystemProfileEntries();
-		
+
 		try {
 			List<Profile> profileList = ProfileDB.getAllProfiles();
 			for (Profile profile : profileList) {
 				if(profile.getTag().equals("")){
 					continue;
 				}
-				
+
 				List<String> ec2RegionList = PrivateKeyDB.getEC2Regions();
-				
+
 				//remove Formating Char
 				String tags = profile.getTag().replaceAll("\n", "").replaceAll("\r", "").replaceAll("\t", "");
-				
+
 				String[] tagArr1 = tags.split(",");
-				
+
 				Map<String, String> tagMap = new HashMap<>();
 	            List<String> tagList = new ArrayList<>();
-				
+
 	            if (tagArr1.length > 0) {
 	                for (String tag1 : tagArr1) {
 	                    String[] tagArr2 = tag1.split("=");
@@ -284,14 +320,14 @@ public class ProfileSystemsDB {
 	                    }
 	                }
 	            }
-				
+
 	            //get AWS credentials from DB
                 for (AWSCred awsCred : AWSCredDB.getAWSCredList()) {
 
                     if (awsCred != null && awsCred.isValid()) {
                         //set  AWS credentials for service
                         BasicAWSCredentials awsCredentials = new BasicAWSCredentials(awsCred.getAccessKey(), awsCred.getSecretKey());
-	            
+
                         for (String ec2Region : ec2RegionList) {
                             //create service
 
@@ -307,12 +343,12 @@ public class ProfileSystemsDB {
     	                    		keyValueList.add(ec2Key.getKeyname());
     	                    	}
     	                    }
-                            
+
                             DescribeInstancesRequest describeInstancesRequest = new DescribeInstancesRequest();
 
                             Filter keyNmFilter = new Filter("key-name", keyValueList);
                             describeInstancesRequest.withFilters(keyNmFilter);
-                            
+
                             if (tagList.size() > 0) {
                                 Filter tagFilter = new Filter("tag-key", tagList);
                                 describeInstancesRequest.withFilters(tagFilter);
@@ -323,7 +359,7 @@ public class ProfileSystemsDB {
                                 Filter tagValueFilter = new Filter("tag:" + tag, Arrays.asList(tagMap.get(tag)));
                                 describeInstancesRequest.withFilters(tagValueFilter);
                             }
-                            
+
                             DescribeInstancesResult describeInstancesResult = service.describeInstances(describeInstancesRequest);
 
 
@@ -335,19 +371,19 @@ public class ProfileSystemsDB {
                             }
                         }
                     }
-                }	
+                }
 			}
 		}catch (AmazonServiceException ex)
         {
             ex.printStackTrace();
         }
 	}
-	
+
 	/**
-	 * Delete all Entries from system_map where system has not instance_id "---" 
+	 * Delete all Entries from system_map where system has not instance_id "---"
 	 */
 	public static void deleteAWSSystemProfileEntries() {
-		
+
 		Connection con = null;
 		try {
 			con = DBUtils.getConn();

@@ -32,12 +32,16 @@ import java.sql.SQLException;
 import java.sql.Savepoint;
 import java.sql.Statement;
 import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * DAO class to manage users
  */
 public class UserDB {
+
+    private static Logger log = LoggerFactory.getLogger(UserDB.class);
 
     public static final String SORT_BY_FIRST_NM="first_nm";
     public static final String SORT_BY_LAST_NM="last_nm";
@@ -82,7 +86,53 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
+        }
+        DBUtils.closeConn(con);
+
+        sortedSet.setItemList(userList);
+        return sortedSet;
+    }
+
+    /**
+     * returns all admin users based on sort order defined
+     * @param sortedSet object that defines sort order
+     * @return sorted user list
+     */
+    public static SortedSet getAdminUserSet(SortedSet sortedSet) {
+
+        ArrayList<User> userList = new ArrayList<User>();
+
+
+        String orderBy = "";
+        if (sortedSet.getOrderByField() != null && !sortedSet.getOrderByField().trim().equals("")) {
+            orderBy = "order by " + sortedSet.getOrderByField() + " " + sortedSet.getOrderByDirection();
+        }
+        String sql = "select * from  users where enabled=true and user_type like '" + User.ADMINISTRATOR + "' " + orderBy;
+
+        Connection con = null;
+        try {
+            con = DBUtils.getConn();
+            PreparedStatement stmt = con.prepareStatement(sql);
+            ResultSet rs = stmt.executeQuery();
+            while (rs.next()) {
+                User user = new User();
+                user.setId(rs.getLong("id"));
+                user.setFirstNm(rs.getString("first_nm"));
+                user.setLastNm(rs.getString("last_nm"));
+                user.setEmail(rs.getString("email"));
+                user.setUsername(rs.getString("username"));
+                user.setPassword(rs.getString("password"));
+                user.setAuthType(rs.getString("auth_type"));
+                user.setUserType(rs.getString("user_type"));
+                userList.add(user);
+
+            }
+            DBUtils.closeRs(rs);
+            DBUtils.closeStmt(stmt);
+
+        } catch (Exception e) {
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
 
@@ -104,7 +154,7 @@ public class UserDB {
             con = DBUtils.getConn();
             user = getUser(con, userId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return user;
@@ -142,7 +192,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return user;
     }
@@ -160,7 +210,7 @@ public class UserDB {
             con = DBUtils.getConn();
             userId = insertUser(con, user);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return userId;
@@ -199,7 +249,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return userId;
     }
@@ -222,8 +272,12 @@ public class UserDB {
             stmt.setLong(6, user.getId());
             stmt.execute();
             DBUtils.closeStmt(stmt);
+            if (User.ADMINISTRATOR.equals(user.getUserType())) {
+                PublicKeyDB.deleteUnassignedKeysByUser(con, user.getId());
+            }
+
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -249,9 +303,12 @@ public class UserDB {
             stmt.setLong(8, user.getId());
             stmt.execute();
             DBUtils.closeStmt(stmt);
+            if(User.ADMINISTRATOR.equals(user.getUserType())) {
+                PublicKeyDB.deleteUnassignedKeysByUser(con, user.getId());
+            }
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -271,7 +328,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -291,7 +348,7 @@ public class UserDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -323,7 +380,7 @@ public class UserDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch(Exception ex){
-            ex.printStackTrace();
+            log.error(ex.toString(), ex);
         }
         DBUtils.closeConn(con);
         return isUnique;

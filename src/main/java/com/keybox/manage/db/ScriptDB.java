@@ -24,12 +24,15 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.util.ArrayList;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * DAO to manage scripts
  */
 public class ScriptDB {
 
+    private static Logger log = LoggerFactory.getLogger(ScriptDB.class);
 
     public static final String SORT_BY_DISPLAY_NM="display_nm";
 
@@ -68,7 +71,7 @@ public class ScriptDB {
             DBUtils.closeRs(rs);
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         sortedSet.setItemList(scriptList);
@@ -90,7 +93,7 @@ public class ScriptDB {
             con = DBUtils.getConn();
             script = getScript(con, scriptId, userId);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
         return script;
@@ -122,7 +125,7 @@ public class ScriptDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         return script;
     }
@@ -145,7 +148,7 @@ public class ScriptDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -169,7 +172,7 @@ public class ScriptDB {
             DBUtils.closeStmt(stmt);
 
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }
@@ -190,7 +193,7 @@ public class ScriptDB {
             stmt.execute();
             DBUtils.closeStmt(stmt);
         } catch (Exception e) {
-            e.printStackTrace();
+            log.error(e.toString(), e);
         }
         DBUtils.closeConn(con);
     }

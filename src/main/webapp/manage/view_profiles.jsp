@@ -86,7 +86,7 @@
 
         <h3>Manage System/Instance Profiles</h3>
 
-        <p>Add / Delete profiles or select a profile below to assign systems to that profile. For EC2 Connection use tags to control user access</p>
+        <p>Add / Delete profiles or assign users and systems to that profile. For EC2 Connection use tags to control user access</p>
 
 
         <s:if test="sortedSet.itemList!= null && !sortedSet.itemList.isEmpty()">
@@ -107,16 +107,15 @@
                 <s:iterator var="profile" value="sortedSet.itemList" status="stat">
                     <tr>
                         <td>
-                            <a href="viewProfileSystems.action?profile.id=<s:property value="id"/>"
-                               title="Manage Systems in Profile">
-                                <s:property value="nm"/>
-                            </a>
+                            <s:property value="nm"/>
                         </td>
 
                         <td>
                             <div>
+                                <a href="viewProfileUsers.action?profile.id=<s:property value="id"/>">
+                                    <button id="user_assign_btn_<s:property value="id"/>" class="btn btn-default edit_btn spacer spacer-left">Assign Users</button></a>
                                 <a href="viewProfileSystems.action?profile.id=<s:property value="id"/>">
-                                    <button id="assign_btn_<s:property value="id"/>" class="btn btn-default edit_btn spacer spacer-left">Assign Systems</button></a>
+                                    <button id="system_assign_btn_<s:property value="id"/>" class="btn btn-default edit_btn spacer spacer-left">Assign Systems</button></a>
                                     <button class="btn btn-default spacer spacer-middle" data-toggle="modal" data-target="#edit_dialog_<s:property value="id"/>">Edit</button>
                                     <button id="del_btn_<s:property value="id"/>" class="btn btn-default del_btn spacer spacer-right">Delete</button>
                                 <div style="clear:both"/>

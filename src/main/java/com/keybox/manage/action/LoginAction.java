@@ -27,6 +27,8 @@ import org.apache.struts2.convention.annotation.Action;
 import org.apache.struts2.convention.annotation.Result;
 import org.apache.struts2.interceptor.ServletRequestAware;
 import org.apache.struts2.interceptor.ServletResponseAware;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -37,12 +39,14 @@ import javax.servlet.http.HttpServletResponse;
  */
 public class LoginAction extends ActionSupport implements ServletRequestAware, ServletResponseAware {
 
+    private static Logger loginAuditLogger = LoggerFactory.getLogger("com.keybox.manage.action.LoginAudit");
     HttpServletResponse servletResponse;
     HttpServletRequest servletRequest;
     Auth auth;
     private final String AUTH_ERROR="Authentication Failed : Login credentials are invalid";
+    private final String AUTH_ERROR_NO_PROFILE="Authentication Failed : There are no profiles assigned to this account";
     //check if otp is enabled
-    boolean otpEnabled="true".equals(AppConfig.getProperty("enableOTP"));
+    boolean otpEnabled = ("required".equals(AppConfig.getProperty("oneTimePassword")) || "optional".equals(AppConfig.getProperty("oneTimePassword")));
     boolean pwMailResetEnabled="true".equals(AppConfig.getProperty("pwMailReset"));
 
     @Action(value = "/login",
@@ -76,6 +80,15 @@ public class LoginAction extends ActionSupport implements ServletRequestAware, S
         String retVal = SUCCESS;
 
         String authToken = AuthDB.login(auth);
+
+        //get client IP
+        String clientIP = null;
+        if (StringUtils.isNotEmpty(AppConfig.getProperty("clientIPHeader"))) {
+            clientIP = servletRequest.getHeader(AppConfig.getProperty("clientIPHeader"));
+        }
+        if (StringUtils.isEmpty(clientIP)) {
+            clientIP = servletRequest.getRemoteAddr();
+        }
         if (authToken != null) {
 
             User user = AuthDB.getUserByAuthToken(authToken);
@@ -84,13 +97,15 @@ public class LoginAction extends ActionSupport implements ServletRequestAware, S
                 if (otpEnabled) {
                     sharedSecret = AuthDB.getSharedSecret(user.getId());
                     if (StringUtils.isNotEmpty(sharedSecret) && (auth.getOtpToken() == null || !OTPUtil.verifyToken(sharedSecret, auth.getOtpToken()))) {
+                        loginAuditLogger.info(auth.getUsername() + " (" + clientIP + ") - "  + AUTH_ERROR);
                         addActionError(AUTH_ERROR);
                         return INPUT;
                     }
                 }
                 //check to see if admin has any assigned profiles
                 if(!User.MANAGER.equals(user.getUserType()) && (user.getProfileList()==null || user.getProfileList().size()<=0)){
-                    addActionError("Authentication Failed : There are no profiles assigned to this account");
+                    loginAuditLogger.info(auth.getUsername() + " (" + clientIP + ") - " + AUTH_ERROR_NO_PROFILE);
+                    addActionError(AUTH_ERROR_NO_PROFILE);
                     return INPUT;
                 }
 
@@ -102,15 +117,18 @@ public class LoginAction extends ActionSupport implements ServletRequestAware, S
 
                 //for first time login redirect to set OTP
                 if (otpEnabled && StringUtils.isEmpty(sharedSecret)) {
-                    return "otp";
+                    retVal = "otp";
                 } else if ("changeme".equals(auth.getPassword())  && Auth.AUTH_BASIC.equals(user.getAuthType())) {
                     retVal = "change_password";
                 }
+                loginAuditLogger.info(auth.getUsername() + " (" + clientIP + ") - Authentication Success");
             }
         } else {
+            loginAuditLogger.info(auth.getUsername() + " (" + clientIP + ") - " + AUTH_ERROR);
             addActionError(AUTH_ERROR);
             retVal = INPUT;
         }
+
         return retVal;
     }
 

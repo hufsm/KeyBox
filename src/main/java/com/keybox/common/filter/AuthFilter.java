@@ -25,11 +25,15 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Filter determines if admin user is authenticated
  */
 public class AuthFilter implements Filter {
+
+    private static Logger log = LoggerFactory.getLogger(AuthFilter.class);
 
     public void init(FilterConfig config) throws ServletException {
 
@@ -90,7 +94,7 @@ public class AuthFilter implements Filter {
                     }
 
                 } catch (Exception ex) {
-                    ex.printStackTrace();
+                    log.error(ex.toString(), ex);
                     isAdmin = false;
                 }
             }

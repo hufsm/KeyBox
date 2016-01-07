@@ -19,6 +19,7 @@ import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.qrcode.QRCodeWriter;
+import com.keybox.common.util.AppConfig;
 import com.keybox.common.util.AuthUtil;
 import com.keybox.manage.db.AuthDB;
 import com.keybox.manage.db.UserDB;
@@ -37,9 +38,13 @@ import java.awt.image.BufferedImage;
 import java.net.URLEncoder;
 import java.util.Date;
 import java.util.Hashtable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class OTPAction extends ActionSupport implements ServletRequestAware, ServletResponseAware {
 
+    private static Logger log = LoggerFactory.getLogger(OTPAction.class);
+    public static boolean requireOTP = "required".equals(AppConfig.getProperty("oneTimePassword"));
 
     //QR image size
     private static final int QR_IMAGE_WIDTH = 325;
@@ -77,6 +82,10 @@ public class OTPAction extends ActionSupport implements ServletRequestAware, Ser
     public String otpSubmit() {
 
         AuthDB.updateSharedSecret(sharedSecret, AuthUtil.getAuthToken(servletRequest.getSession()));
+
+        if (requireOTP) {
+            AuthUtil.deleteAllSession(servletRequest.getSession());
+        }
         return SUCCESS;
 
     }
@@ -124,9 +133,8 @@ public class OTPAction extends ActionSupport implements ServletRequestAware, Ser
             servletResponse.getOutputStream().close();
             
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error(ex.toString(), ex);
         }
-
 
         return null;
 

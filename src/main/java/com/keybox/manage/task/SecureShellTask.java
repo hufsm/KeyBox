@@ -22,13 +22,16 @@ import com.keybox.manage.model.SessionOutput;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
  * Task to watch for output read from the ssh session stream
  */
 public class SecureShellTask implements Runnable {
+
+    private static Logger log = LoggerFactory.getLogger(SecureShellTask.class);
 
     InputStream outFromChannel;
     SessionOutput sessionOutput;
@@ -43,7 +46,7 @@ public class SecureShellTask implements Runnable {
         InputStreamReader isr = new InputStreamReader(outFromChannel);
         BufferedReader br = new BufferedReader(isr);
         try {
-            SessionOutputUtil.addOutput(sessionOutput.getSessionId(), sessionOutput.getHostSystemId(), sessionOutput);
+            SessionOutputUtil.addOutput(sessionOutput);
             char[] buff = new char[SSHUtil.KEY_LENGTH];
             int read;
             while((read = br.read(buff)) != -1) {
@@ -52,7 +55,7 @@ public class SecureShellTask implements Runnable {
             }
             SessionOutputUtil.removeOutput(sessionOutput.getSessionId(), sessionOutput.getInstanceId());
         } catch (Exception ex) {
-            ex.printStackTrace();
+            log.error(ex.toString(), ex);
         }
     }
 }

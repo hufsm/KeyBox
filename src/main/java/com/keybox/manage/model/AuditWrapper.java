@@ -15,31 +15,29 @@
  */
 package com.keybox.manage.model;
 
-/**
- * host id and string builder output
- */
-public class SessionHostOutput {
-    Long id;
-    StringBuilder output;
-    
-    public SessionHostOutput(Long id, StringBuilder output){
-        this.id=id;
-        this.output=output;
+public class AuditWrapper {
+
+    User user;
+    SessionOutput sessionOutput;
+
+    public AuditWrapper(User user, SessionOutput sessionOutput) {
+        this.user=user;
+        this.sessionOutput=sessionOutput;
     }
 
-    public Long getId() {
-        return id;
+    public User getUser() {
+        return user;
     }
 
-    public void setId(Long id) {
-        this.id = id;
+    public void setUser(User user) {
+        this.user = user;
     }
 
-    public StringBuilder getOutput() {
-        return output;
+    public SessionOutput getSessionOutput() {
+        return sessionOutput;
     }
 
-    public void setOutput(StringBuilder output) {
-        this.output = output;
+    public void setSessionOutput(SessionOutput sessionOutput) {
+        this.sessionOutput = sessionOutput;
     }
 }

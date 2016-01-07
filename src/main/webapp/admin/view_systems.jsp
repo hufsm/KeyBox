@@ -137,7 +137,7 @@
                         <th id="<s:property value="@com.keybox.manage.db.SystemDB@SORT_BY_NAME"/>" class="sort">Display
                             Name
                         </th>
-                        <th id="<s:property value="@com.keybox.manage.db.SystemDB@SORT_BY_INSTANCE_ID"/>" class="sort"> 
+                        <th id="<s:property value="@com.keybox.manage.db.SystemDB@SORT_BY_INSTANCE_ID"/>" class="sort">
                     		AWS Instance ID
                     	</th>
                         <th id="<s:property value="@com.keybox.manage.db.SystemDB@SORT_BY_USER"/>" class="sort">User
@@ -169,7 +169,7 @@
                             	<s:if test="!(enabled && applicationKey.enabled)">
                             		<div class="error">Temporarily disabled</div>
                             	</s:if>
-                            	
+
 	                            <s:if test="statusCd=='INITIAL'">
 	                                <div class="warning">Not Started</div>
 	                            </s:if>
@@ -200,7 +200,7 @@
                         	</td>
                             <td>
                                 <button type="button" class="btn btn-default ssh_btn" data-toggle="modal" data-target="#ssh_access_<s:property value="id"/>">Your SSH Access</button>
-                            </td>   
+                            </td>
                         </tr>
                     </s:iterator>
                     </tbody>
@@ -223,7 +223,7 @@
                  </p>
                 </div>
         </s:else>
-        
+
         <s:iterator var="system" value="sortedSet.itemList" status="stat">
             <div id="ssh_access_<s:property value="id"/>" class="modal fade">
                 <div class="modal-dialog" style="width: 800px;">
@@ -241,22 +241,22 @@
                                         Keybox provides the file names based on the keys you've added.</li>
                                         <li>Your key must not be publicly viewable for SSH to work if you use an ssh-client within Unix/Linux environment.<br><br>
                                             Use this command if needed:
-                                            
+
                                             <s:if test="publicKeyList!= null && !publicKeyList.isEmpty()">
                                                 <s:iterator var="system" value="publicKeyList" status="stat">
                                                     <pre>chmod 400 <s:property value="keyNm"/>.key</pre>
                                                 </s:iterator>
                                             </s:if>
                                             <s:else>
-                                                <pre>chmod 400 excample.key</pre>
+                                                <pre>chmod 400 example.key</pre>
                                             </s:else>
-                                            
+
                                             Ensure that  ~./.ssh folder is set to 600
-                                                            
+
                                         <li>Example:<br>
                                             <s:if test="publicKeyList!= null && !publicKeyList.isEmpty()">
                                                 <s:iterator var="system" value="publicKeyList" status="stat">
-                                                    Profile 
+                                                    Profile
                                                     	<s:if test="profile== null">
     	                                                	All Systems:
                                                     	</s:if>
